@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TPV Bar - Ventas</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>TPV Bar - Ventas</h1>
+
+        <!-- Sección de categorías -->
+        <div class="categorias">
+            <h2>Categorías</h2>
+            <div id="grid-categorias" class="grid-botones">
+                <!-- Las categorías se cargarán aquí dinámicamente -->
+            </div>
+        </div>
+
+        <!-- Sección de productos -->
+        <div class="productos">
+            <h2>Productos</h2>
+            <div id="grid-productos" class="grid-botones">
+                <!-- Los productos se cargarán aquí dinámicamente -->
+            </div>
+        </div>
+
+        <!-- Sección de pedido -->
+        <div class="pedido">
+            <h2>Pedido Actual</h2>
+            <ul id="lista-pedido">
+                <!-- Los productos seleccionados se mostrarán aquí -->
+            </ul>
+            <p>Total: <span id="total">0.00</span> €</p>
+            <button id="finalizar-pedido">Finalizar Pedido</button>
+        </div>
+
+        <!-- Enlace a la página de gestión -->
+        <a href="index.html" class="btn-gestion">Ir a Gestión</a>
+        <!-- Enlace a la página de mesas -->
+        <a href="mesas.html" class="btn-mesas">Ir a Mesas</a>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

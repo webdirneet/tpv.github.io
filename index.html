@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TPV Bar - Gestión</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>TPV Bar - Gestión</h1>
+
+        <!-- Sección de gestión de categorías -->
+        <div class="gestion-categorias">
+            <h2>Gestión de Categorías</h2>
+            <input type="text" id="nombre-categoria" placeholder="Nombre de la categoría">
+            <button id="agregar-categoria">Agregar Categoría</button>
+            <ul id="lista-categorias">
+                <!-- Las categorías se cargarán aquí dinámicamente -->
+            </ul>
+        </div>
+
+        <!-- Sección de gestión de productos -->
+        <div class="gestion-productos">
+            <h2>Gestión de Productos</h2>
+            <input type="text" id="nombre-producto" placeholder="Nombre del producto">
+            <input type="number" id="precio-producto" placeholder="Precio">
+            <select id="categoria-producto">
+                <!-- Las opciones de categorías se cargarán aquí dinámicamente -->
+            </select>
+            <button id="agregar-producto">Agregar Producto</button>
+            <ul id="lista-productos">
+                <!-- Los productos se cargarán aquí dinámicamente -->
+            </ul>
+        </div>
+
+        <!-- Enlace a la página de ventas -->
+        <a href="ventas.html" class="btn-ventas">Ir a Ventas</a>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
