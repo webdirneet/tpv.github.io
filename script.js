@@ -33,7 +33,7 @@ function mostrarCategorias() {
         gridCategorias.innerHTML = '';
         categorias.forEach(categoria => {
             const button = document.createElement('button');
-            button.textContent = categoria.nombre.substring(0, 3); // Muestra solo las primeras 3 letras
+            button.textContent = categoria.nombre;
             button.onclick = () => mostrarProductosCategoria(categoria.id);
             gridCategorias.appendChild(button);
         });
@@ -48,7 +48,7 @@ function mostrarProductosCategoria(categoriaId) {
         const productosCategoria = productos.filter(p => p.categoriaId === categoriaId);
         productosCategoria.forEach(producto => {
             const button = document.createElement('button');
-            button.textContent = producto.nombre.substring(0, 3); // Muestra solo las primeras 3 letras
+            button.textContent = producto.nombre;
             button.onclick = () => agregarAlPedido(producto.id);
             gridProductos.appendChild(button);
         });
@@ -91,6 +91,7 @@ if (finalizarPedidoBtn) {
             pedido = [];
             total = 0;
             actualizarPedido();
+            mostrarMesas(); // Actualizar el estado de las mesas
         } else {
             alert('Número de mesa no válido.');
         }
@@ -106,6 +107,9 @@ function mostrarMesas() {
             const button = document.createElement('button');
             button.textContent = `Mesa ${index + 1}`;
             button.onclick = () => gestionarMesa(index);
+            if (mesa.pedido.length > 0) {
+                button.classList.add('rojo'); // Añadir clase rojo si hay pedidos
+            }
             const totalMesa = document.createElement('p');
             totalMesa.textContent = `Total: ${mesa.total.toFixed(2)} €`;
             gridMesas.appendChild(button);
@@ -117,7 +121,12 @@ function mostrarMesas() {
 // Gestionar mesa (en mesas.html)
 function gestionarMesa(index) {
     const mesa = mesas[index];
-    alert(`Mesa ${index + 1}\nPedido: ${mesa.pedido.map(p => p.nombre).join(', ')}\nTotal: ${mesa.total.toFixed(2)} €`);
+    const confirmacion = confirm(`Mesa ${index + 1}\nPedido: ${mesa.pedido.map(p => p.nombre).join(', ')}\nTotal: ${mesa.total.toFixed(2)} €\n¿Desea finalizar el pedido de esta mesa?`);
+    if (confirmacion) {
+        mesas[index] = { pedido: [], total: 0 }; // Reiniciar la mesa
+        guardarDatos();
+        mostrarMesas(); // Actualizar el estado de las mesas
+    }
 }
 
 // Inicializar

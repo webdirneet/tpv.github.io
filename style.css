@@ -28,24 +28,28 @@ h1, h2 {
 
 .grid-botones {
     display: grid;
-    grid-template-columns: repeat(4, 40px);
-    grid-template-rows: repeat(5, 40px);
+    grid-template-columns: repeat(4, 1fr);
     gap: 10px;
     margin-bottom: 20px;
 }
 
 .grid-botones button {
-    width: 40px;
-    height: 40px;
+    padding: 10px;
     background-color: #28a745;
     color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    white-space: nowrap; /* Evita que el texto se divida en varias líneas */
+    min-width: 60px; /* Ancho mínimo para que los botones no sean demasiado pequeños */
 }
 
 .grid-botones button:hover {
     background-color: #218838;
+}
+
+.grid-botones button.rojo {
+    background-color: #dc3545; /* Color rojo para mesas con pedidos */
 }
 
 ul {
