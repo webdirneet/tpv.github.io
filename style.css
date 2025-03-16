@@ -12,14 +12,14 @@ body {
     padding: 20px;
 }
 
-.categorias, .productos, .pedido, .mesas {
+.gestion-categorias, .gestion-productos, .categorias, .productos, .pedido, .mesas {
     background-color: #fff;
     padding: 20px;
     border-radius: 8px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     margin-bottom: 20px;
-    width: 80%;
-    max-width: 600px;
+    width: 90%;
+    max-width: 800px;
 }
 
 h1, h2 {
@@ -28,7 +28,7 @@ h1, h2 {
 
 .grid-botones {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
     gap: 10px;
     margin-bottom: 20px;
 }
@@ -40,16 +40,11 @@ h1, h2 {
     border: none;
     border-radius: 5px;
     cursor: pointer;
-    white-space: nowrap; /* Evita que el texto se divida en varias líneas */
-    min-width: 60px; /* Ancho mínimo para que los botones no sean demasiado pequeños */
-}
-
-.grid-botones button:hover {
-    background-color: #218838;
+    white-space: nowrap;
 }
 
 .grid-botones button.rojo {
-    background-color: #dc3545; /* Color rojo para mesas con pedidos */
+    background-color: #dc3545;
 }
 
 ul {
@@ -70,15 +65,23 @@ li {
     color: #333;
 }
 
-.btn-ventas, .btn-gestion, .btn-mesas {
+.btn-ventas, .btn-gestion, .btn-mesas, #exportar-datos {
     background-color: #007bff;
     color: white;
     padding: 10px 20px;
     text-decoration: none;
     border-radius: 5px;
     margin-top: 20px;
+    border: none;
+    cursor: pointer;
 }
 
-.btn-ventas:hover, .btn-gestion:hover, .btn-mesas:hover {
+.btn-ventas:hover, .btn-gestion:hover, .btn-mesas:hover, #exportar-datos:hover {
     background-color: #0056b3;
+}
+
+@media (max-width: 600px) {
+    .grid-botones {
+        grid-template-columns: repeat(2, 1fr);
+    }
 }

@@ -129,6 +129,21 @@ function gestionarMesa(index) {
     }
 }
 
+// Exportar datos (en mesas.html)
+const exportarDatosBtn = document.getElementById('exportar-datos');
+if (exportarDatosBtn) {
+    exportarDatosBtn.addEventListener('click', () => {
+        const datos = JSON.stringify(mesas, null, 2);
+        const blob = new Blob([datos], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'mesas.json';
+        a.click();
+        URL.revokeObjectURL(url);
+    });
+}
+
 // Inicializar
 cargarCategorias();
 mostrarCategorias();
