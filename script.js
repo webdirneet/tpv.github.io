@@ -5,11 +5,28 @@ let pedido = [];
 let total = 0;
 let mesas = JSON.parse(localStorage.getItem('mesas')) || Array(10).fill({ pedido: [], total: 0 });
 
-// Guardar datos en localStorage
+// Guardar datos en localStorage y exportar a JSON
 function guardarDatos() {
     localStorage.setItem('categorias', JSON.stringify(categorias));
     localStorage.setItem('productos', JSON.stringify(productos));
     localStorage.setItem('mesas', JSON.stringify(mesas));
+    exportarDatosJSON(); // Exportar datos a JSON cada vez que se guardan
+}
+
+// Exportar datos a un archivo JSON
+function exportarDatosJSON() {
+    const datos = {
+        categorias: categorias,
+        productos: productos,
+        mesas: mesas
+    };
+    const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'datos_tpv.json';
+    a.click();
+    URL.revokeObjectURL(url);
 }
 
 // Cargar categorías en el select
@@ -86,7 +103,7 @@ if (finalizarPedidoBtn) {
         if (mesa >= 1 && mesa <= 10) {
             mesas[mesa - 1].pedido.push(...pedido);
             mesas[mesa - 1].total += total;
-            guardarDatos();
+            guardarDatos(); // Guardar datos y exportar a JSON
             alert(`Pedido de la mesa ${mesa} guardado. Total: ${total.toFixed(2)} €`);
             pedido = [];
             total = 0;
@@ -124,23 +141,16 @@ function gestionarMesa(index) {
     const confirmacion = confirm(`Mesa ${index + 1}\nPedido: ${mesa.pedido.map(p => p.nombre).join(', ')}\nTotal: ${mesa.total.toFixed(2)} €\n¿Desea finalizar el pedido de esta mesa?`);
     if (confirmacion) {
         mesas[index] = { pedido: [], total: 0 }; // Reiniciar la mesa
-        guardarDatos();
+        guardarDatos(); // Guardar datos y exportar a JSON
         mostrarMesas(); // Actualizar el estado de las mesas
     }
 }
 
-// Exportar datos (en mesas.html)
+// Exportar datos manualmente (en mesas.html)
 const exportarDatosBtn = document.getElementById('exportar-datos');
 if (exportarDatosBtn) {
     exportarDatosBtn.addEventListener('click', () => {
-        const datos = JSON.stringify(mesas, null, 2);
-        const blob = new Blob([datos], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'mesas.json';
-        a.click();
-        URL.revokeObjectURL(url);
+        exportarDatosJSON(); // Exportar datos a JSON manualmente
     });
 }
 
