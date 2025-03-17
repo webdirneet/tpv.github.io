@@ -45,116 +45,126 @@ function cargarCategorias() {
 
 // Mostrar categorías en la lista
 function mostrarCategorias() {
-    const gridCategorias = document.getElementById('grid-categorias');
-    if (gridCategorias) {
-        gridCategorias.innerHTML = '';
+    const listaCategorias = document.getElementById('lista-categorias');
+    if (listaCategorias) {
+        listaCategorias.innerHTML = '';
         categorias.forEach(categoria => {
-            const button = document.createElement('button');
-            button.textContent = categoria.nombre;
-            button.onclick = () => mostrarProductosCategoria(categoria.id);
-            gridCategorias.appendChild(button);
-        });
-    }
-}
-
-// Mostrar productos por categoría (en ventas.html)
-function mostrarProductosCategoria(categoriaId) {
-    const gridProductos = document.getElementById('grid-productos');
-    if (gridProductos) {
-        gridProductos.innerHTML = '';
-        const productosCategoria = productos.filter(p => p.categoriaId === categoriaId);
-        productosCategoria.forEach(producto => {
-            const button = document.createElement('button');
-            button.textContent = producto.nombre;
-            button.onclick = () => agregarAlPedido(producto.id);
-            gridProductos.appendChild(button);
-        });
-    }
-}
-
-// Agregar producto al pedido (en ventas.html)
-function agregarAlPedido(id) {
-    const producto = productos.find(p => p.id === id);
-    pedido.push(producto);
-    total += producto.precio;
-    actualizarPedido();
-}
-
-// Actualizar pedido (en ventas.html)
-function actualizarPedido() {
-    const listaPedido = document.getElementById('lista-pedido');
-    const totalElement = document.getElementById('total');
-    if (listaPedido && totalElement) {
-        listaPedido.innerHTML = '';
-        pedido.forEach(producto => {
             const li = document.createElement('li');
-            li.innerHTML = `${producto.nombre} - ${producto.precio.toFixed(2)} €`;
-            listaPedido.appendChild(li);
+            li.innerHTML = `
+                ${categoria.nombre}
+                <button onclick="editarCategoria(${categoria.id})">Editar</button>
+                <button onclick="eliminarCategoria(${categoria.id})">Eliminar</button>
+            `;
+            listaCategorias.appendChild(li);
         });
-        totalElement.textContent = total.toFixed(2);
     }
 }
 
-// Finalizar pedido (en ventas.html)
-const finalizarPedidoBtn = document.getElementById('finalizar-pedido');
-if (finalizarPedidoBtn) {
-    finalizarPedidoBtn.addEventListener('click', () => {
-        const mesa = prompt('Introduce el número de mesa (1-10):');
-        if (mesa >= 1 && mesa <= 10) {
-            mesas[mesa - 1].pedido.push(...pedido);
-            mesas[mesa - 1].total += total;
-            guardarDatos(); // Guardar datos y exportar a JSON
-            alert(`Pedido de la mesa ${mesa} guardado. Total: ${total.toFixed(2)} €`);
-            pedido = [];
-            total = 0;
-            actualizarPedido();
-            mostrarMesas(); // Actualizar el estado de las mesas
+// Agregar categoría
+const agregarCategoriaBtn = document.getElementById('agregar-categoria');
+if (agregarCategoriaBtn) {
+    agregarCategoriaBtn.addEventListener('click', () => {
+        const nombre = document.getElementById('nombre-categoria').value.trim();
+        if (nombre) {
+            const nuevaCategoria = {
+                id: Date.now(), // ID único basado en la fecha actual
+                nombre: nombre
+            };
+            categorias.push(nuevaCategoria);
+            guardarDatos(); // Guardar datos en localStorage
+            document.getElementById('nombre-categoria').value = ''; // Limpiar el campo de entrada
+            cargarCategorias(); // Actualizar el select de categorías
+            mostrarCategorias(); // Actualizar la lista de categorías
         } else {
-            alert('Número de mesa no válido.');
+            alert('Por favor, introduce un nombre válido para la categoría.');
         }
     });
 }
 
-// Mostrar mesas (en mesas.html)
-function mostrarMesas() {
-    const gridMesas = document.getElementById('grid-mesas');
-    if (gridMesas) {
-        gridMesas.innerHTML = '';
-        mesas.forEach((mesa, index) => {
-            const button = document.createElement('button');
-            button.textContent = `Mesa ${index + 1}`;
-            button.onclick = () => gestionarMesa(index);
-            if (mesa.pedido.length > 0) {
-                button.classList.add('rojo'); // Añadir clase rojo si hay pedidos
-            }
-            const totalMesa = document.createElement('p');
-            totalMesa.textContent = `Total: ${mesa.total.toFixed(2)} €`;
-            gridMesas.appendChild(button);
-            gridMesas.appendChild(totalMesa);
+// Editar categoría
+function editarCategoria(id) {
+    const categoria = categorias.find(c => c.id === id);
+    const nuevoNombre = prompt('Editar categoría:', categoria.nombre);
+    if (nuevoNombre) {
+        categoria.nombre = nuevoNombre;
+        guardarDatos(); // Guardar datos en localStorage
+        mostrarCategorias(); // Actualizar la lista de categorías
+    }
+}
+
+// Eliminar categoría
+function eliminarCategoria(id) {
+    categorias = categorias.filter(c => c.id !== id);
+    productos = productos.filter(p => p.categoriaId !== id); // Eliminar productos de la categoría eliminada
+    guardarDatos(); // Guardar datos en localStorage
+    mostrarCategorias(); // Actualizar la lista de categorías
+    mostrarProductos(); // Actualizar la lista de productos
+}
+
+// Mostrar productos en la lista
+function mostrarProductos() {
+    const listaProductos = document.getElementById('lista-productos');
+    if (listaProductos) {
+        listaProductos.innerHTML = '';
+        productos.forEach(producto => {
+            const li = document.createElement('li');
+            li.innerHTML = `
+                ${producto.nombre} - ${producto.precio.toFixed(2)} € (${categorias.find(c => c.id === producto.categoriaId).nombre})
+                <button onclick="editarProducto(${producto.id})">Editar</button>
+                <button onclick="eliminarProducto(${producto.id})">Eliminar</button>
+            `;
+            listaProductos.appendChild(li);
         });
     }
 }
 
-// Gestionar mesa (en mesas.html)
-function gestionarMesa(index) {
-    const mesa = mesas[index];
-    const confirmacion = confirm(`Mesa ${index + 1}\nPedido: ${mesa.pedido.map(p => p.nombre).join(', ')}\nTotal: ${mesa.total.toFixed(2)} €\n¿Desea finalizar el pedido de esta mesa?`);
-    if (confirmacion) {
-        mesas[index] = { pedido: [], total: 0 }; // Reiniciar la mesa
-        guardarDatos(); // Guardar datos y exportar a JSON
-        mostrarMesas(); // Actualizar el estado de las mesas
+// Agregar producto
+const agregarProductoBtn = document.getElementById('agregar-producto');
+if (agregarProductoBtn) {
+    agregarProductoBtn.addEventListener('click', () => {
+        const nombre = document.getElementById('nombre-producto').value.trim();
+        const precio = parseFloat(document.getElementById('precio-producto').value);
+        const categoriaId = parseInt(document.getElementById('categoria-producto').value);
+
+        if (nombre && !isNaN(precio) && categoriaId) {
+            const nuevoProducto = {
+                id: Date.now(), // ID único basado en la fecha actual
+                nombre: nombre,
+                precio: precio,
+                categoriaId: categoriaId
+            };
+            productos.push(nuevoProducto);
+            guardarDatos(); // Guardar datos en localStorage
+            document.getElementById('nombre-producto').value = ''; // Limpiar el campo de entrada
+            document.getElementById('precio-producto').value = ''; // Limpiar el campo de entrada
+            mostrarProductos(); // Actualizar la lista de productos
+        } else {
+            alert('Por favor, introduce datos válidos para el producto.');
+        }
+    });
+}
+
+// Editar producto
+function editarProducto(id) {
+    const producto = productos.find(p => p.id === id);
+    const nuevoNombre = prompt('Editar nombre:', producto.nombre);
+    const nuevoPrecio = parseFloat(prompt('Editar precio:', producto.precio));
+    if (nuevoNombre && !isNaN(nuevoPrecio)) {
+        producto.nombre = nuevoNombre;
+        producto.precio = nuevoPrecio;
+        guardarDatos(); // Guardar datos en localStorage
+        mostrarProductos(); // Actualizar la lista de productos
     }
 }
 
-// Exportar datos manualmente (en mesas.html)
-const exportarDatosBtn = document.getElementById('exportar-datos');
-if (exportarDatosBtn) {
-    exportarDatosBtn.addEventListener('click', () => {
-        exportarDatosJSON(); // Exportar datos a JSON manualmente
-    });
+// Eliminar producto
+function eliminarProducto(id) {
+    productos = productos.filter(p => p.id !== id);
+    guardarDatos(); // Guardar datos en localStorage
+    mostrarProductos(); // Actualizar la lista de productos
 }
 
 // Inicializar
 cargarCategorias();
 mostrarCategorias();
-mostrarMesas();
+mostrarProductos();
