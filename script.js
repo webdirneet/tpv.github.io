@@ -1,170 +1,164 @@
-// Datos iniciales (se cargan desde localStorage)
-let categorias = JSON.parse(localStorage.getItem('categorias')) || [];
-let productos = JSON.parse(localStorage.getItem('productos')) || [];
-let pedido = [];
-let total = 0;
-let mesas = JSON.parse(localStorage.getItem('mesas')) || Array(10).fill({ pedido: [], total: 0 });
+// Estado global
+let categories = JSON.parse(localStorage.getItem('categories')) || [];
+let products = JSON.parse(localStorage.getItem('products')) || [];
+let orders = JSON.parse(localStorage.getItem('orders')) || Array(10).fill([]); // 10 mesas
 
-// Guardar datos en localStorage y exportar a JSON
-function guardarDatos() {
-    localStorage.setItem('categorias', JSON.stringify(categorias));
-    localStorage.setItem('productos', JSON.stringify(productos));
-    localStorage.setItem('mesas', JSON.stringify(mesas));
-    exportarDatosJSON(); // Exportar datos a JSON cada vez que se guardan
+// Guardar datos en localStorage
+function saveData() {
+    localStorage.setItem('categories', JSON.stringify(categories));
+    localStorage.setItem('products', JSON.stringify(products));
+    localStorage.setItem('orders', JSON.stringify(orders));
 }
 
-// Exportar datos a un archivo JSON
-function exportarDatosJSON() {
-    const datos = {
-        categorias: categorias,
-        productos: productos,
-        mesas: mesas
+// Cargar datos en index.html
+if (document.getElementById('categoryForm')) {
+    const categoryForm = document.getElementById('categoryForm');
+    const productForm = document.getElementById('productForm');
+    const categoryList = document.getElementById('categoryList');
+    const productList = document.getElementById('productList');
+    const productCategory = document.getElementById('productCategory');
+    const exportBtn = document.getElementById('exportData');
+
+    // Cargar categorías en el select
+    function updateCategorySelect() {
+        productCategory.innerHTML = '<option value="">Selecciona una categoría</option>' +
+            categories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+    }
+
+    // Mostrar listas
+    function renderLists() {
+        categoryList.innerHTML = categories.map(cat => 
+            `<li>${cat} <button onclick="deleteCategory('${cat}')">Eliminar</button></li>`).join('');
+        productList.innerHTML = products.map(prod => 
+            `<li>${prod.name} - ${prod.price}€ (${prod.category}) <button onclick="deleteProduct('${prod.name}')">Eliminar</button></li>`).join('');
+        updateCategorySelect();
+    }
+
+    // Añadir categoría
+    categoryForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('categoryName').value.trim();
+        if (name && !categories.includes(name)) {
+            categories.push(name);
+            saveData();
+            renderLists();
+            categoryForm.reset();
+        }
+    });
+
+    // Añadir producto
+    productForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const name = document.getElementById('productName').value.trim();
+        const price = parseFloat(document.getElementById('productPrice').value);
+        const category = document.getElementById('productCategory').value;
+        if (name && price > 0 && category && !products.find(p => p.name === name)) {
+            products.push({ name, price, category });
+            saveData();
+            renderLists();
+            productForm.reset();
+        }
+    });
+
+    // Eliminar categoría
+    window.deleteCategory = function(name) {
+        if (products.some(p => p.category === name)) {
+            alert('No se puede eliminar una categoría con productos asociados.');
+            return;
+        }
+        categories = categories.filter(c => c !== name);
+        saveData();
+        renderLists();
     };
-    const blob = new Blob([JSON.stringify(datos, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'datos_tpv.json';
-    a.click();
-    URL.revokeObjectURL(url);
+
+    // Eliminar producto
+    window.deleteProduct = function(name) {
+        products = products.filter(p => p.name !== name);
+        saveData();
+        renderLists();
+    };
+
+    // Exportar datos
+    exportBtn.addEventListener('click', () => {
+        const data = { categories, products, orders };
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'tpv_data.json';
+        a.click();
+    });
+
+    renderLists();
 }
 
-// Cargar categorías en el select
-function cargarCategorias() {
-    const categoriaProductoSelect = document.getElementById('categoria-producto');
-    if (categoriaProductoSelect) {
-        categoriaProductoSelect.innerHTML = '';
-        categorias.forEach(categoria => {
-            const option = document.createElement('option');
-            option.value = categoria.id;
-            option.textContent = categoria.nombre;
-            categoriaProductoSelect.appendChild(option);
-        });
-    }
-}
+// Lógica de ventas.html
+if (document.getElementById('categoryButtons')) {
+    const categoryButtons = document.getElementById('categoryButtons');
+    const productButtons = document.getElementById('productButtons');
+    const tablePrompt = document.getElementById('tablePrompt');
+    const confirmTable = document.getElementById('confirmTable');
+    let selectedCategory = '';
 
-// Mostrar categorías en la lista
-function mostrarCategorias() {
-    const listaCategorias = document.getElementById('lista-categorias');
-    if (listaCategorias) {
-        listaCategorias.innerHTML = '';
-        categorias.forEach(categoria => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-                ${categoria.nombre}
-                <button onclick="editarCategoria(${categoria.id})">Editar</button>
-                <button onclick="eliminarCategoria(${categoria.id})">Eliminar</button>
-            `;
-            listaCategorias.appendChild(li);
-        });
-    }
-}
+    // Mostrar categorías
+    categoryButtons.innerHTML = categories.map(cat => 
+        `<button onclick="showProducts('${cat}')">${cat}</button>`).join('');
 
-// Agregar categoría
-const agregarCategoriaBtn = document.getElementById('agregar-categoria');
-if (agregarCategoriaBtn) {
-    agregarCategoriaBtn.addEventListener('click', () => {
-        const nombre = document.getElementById('nombre-categoria').value.trim();
-        if (nombre) {
-            const nuevaCategoria = {
-                id: Date.now(), // ID único basado en la fecha actual
-                nombre: nombre
-            };
-            categorias.push(nuevaCategoria);
-            guardarDatos(); // Guardar datos en localStorage
-            document.getElementById('nombre-categoria').value = ''; // Limpiar el campo de entrada
-            cargarCategorias(); // Actualizar el select de categorías
-            mostrarCategorias(); // Actualizar la lista de categorías
+    // Mostrar productos de la categoría seleccionada
+    window.showProducts = function(category) {
+        selectedCategory = category;
+        productButtons.innerHTML = products.filter(p => p.category === category).map(prod => 
+            `<button onclick="addToOrder('${prod.name}')">${prod.name}<br>${prod.price}€</button>`).join('');
+    };
+
+    // Añadir producto al pedido
+    window.addToOrder = function(productName) {
+        tablePrompt.classList.remove('hidden');
+    };
+
+    // Confirmar mesa
+    confirmTable.addEventListener('click', () => {
+        const tableNum = parseInt(document.getElementById('tableNumber').value) - 1;
+        if (tableNum >= 0 && tableNum < 10) {
+            const product = products.find(p => p.name === productButtons.querySelector('button:hover')?.textContent.split('\n')[0]);
+            if (product) {
+                orders[tableNum] = orders[tableNum].concat([product]);
+                saveData();
+                tablePrompt.classList.add('hidden');
+            }
         } else {
-            alert('Por favor, introduce un nombre válido para la categoría.');
+            alert('Número de mesa inválido (1-10).');
         }
     });
 }
 
-// Editar categoría
-function editarCategoria(id) {
-    const categoria = categorias.find(c => c.id === id);
-    const nuevoNombre = prompt('Editar categoría:', categoria.nombre);
-    if (nuevoNombre) {
-        categoria.nombre = nuevoNombre;
-        guardarDatos(); // Guardar datos en localStorage
-        mostrarCategorias(); // Actualizar la lista de categorías
+// Lógica de mesas.html
+if (document.getElementById('tables')) {
+    const tablesDiv = document.getElementById('tables');
+
+    // Mostrar mesas
+    function renderTables() {
+        tablesDiv.innerHTML = orders.map((order, i) => {
+            const total = order.reduce((sum, p) => sum + p.price, 0);
+            return `<button class="${order.length ? 'pending' : ''}" onclick="manageTable(${i})">
+                Mesa ${i + 1}<br>Total: ${total.toFixed(2)}€
+            </button>`;
+        }).join('');
     }
-}
 
-// Eliminar categoría
-function eliminarCategoria(id) {
-    categorias = categorias.filter(c => c.id !== id);
-    productos = productos.filter(p => p.categoriaId !== id); // Eliminar productos de la categoría eliminada
-    guardarDatos(); // Guardar datos en localStorage
-    mostrarCategorias(); // Actualizar la lista de categorías
-    mostrarProductos(); // Actualizar la lista de productos
-}
-
-// Mostrar productos en la lista
-function mostrarProductos() {
-    const listaProductos = document.getElementById('lista-productos');
-    if (listaProductos) {
-        listaProductos.innerHTML = '';
-        productos.forEach(producto => {
-            const li = document.createElement('li');
-            li.innerHTML = `
-                ${producto.nombre} - ${producto.precio.toFixed(2)} € (${categorias.find(c => c.id === producto.categoriaId).nombre})
-                <button onclick="editarProducto(${producto.id})">Editar</button>
-                <button onclick="eliminarProducto(${producto.id})">Eliminar</button>
-            `;
-            listaProductos.appendChild(li);
-        });
-    }
-}
-
-// Agregar producto
-const agregarProductoBtn = document.getElementById('agregar-producto');
-if (agregarProductoBtn) {
-    agregarProductoBtn.addEventListener('click', () => {
-        const nombre = document.getElementById('nombre-producto').value.trim();
-        const precio = parseFloat(document.getElementById('precio-producto').value);
-        const categoriaId = parseInt(document.getElementById('categoria-producto').value);
-
-        if (nombre && !isNaN(precio) && categoriaId) {
-            const nuevoProducto = {
-                id: Date.now(), // ID único basado en la fecha actual
-                nombre: nombre,
-                precio: precio,
-                categoriaId: categoriaId
-            };
-            productos.push(nuevoProducto);
-            guardarDatos(); // Guardar datos en localStorage
-            document.getElementById('nombre-producto').value = ''; // Limpiar el campo de entrada
-            document.getElementById('precio-producto').value = ''; // Limpiar el campo de entrada
-            mostrarProductos(); // Actualizar la lista de productos
-        } else {
-            alert('Por favor, introduce datos válidos para el producto.');
+    // Gestionar mesa
+    window.manageTable = function(tableNum) {
+        if (orders[tableNum].length) {
+            if (confirm('¿Finalizar pedido de la Mesa ' + (tableNum + 1) + '?')) {
+                orders[tableNum] = [];
+                saveData();
+                renderTables();
+            } else {
+                // Aquí podrías añadir lógica para agregar más productos
+                alert('Función para añadir más productos aún no implementada.');
+            }
         }
-    });
-}
+    };
 
-// Editar producto
-function editarProducto(id) {
-    const producto = productos.find(p => p.id === id);
-    const nuevoNombre = prompt('Editar nombre:', producto.nombre);
-    const nuevoPrecio = parseFloat(prompt('Editar precio:', producto.precio));
-    if (nuevoNombre && !isNaN(nuevoPrecio)) {
-        producto.nombre = nuevoNombre;
-        producto.precio = nuevoPrecio;
-        guardarDatos(); // Guardar datos en localStorage
-        mostrarProductos(); // Actualizar la lista de productos
-    }
+    renderTables();
 }
-
-// Eliminar producto
-function eliminarProducto(id) {
-    productos = productos.filter(p => p.id !== id);
-    guardarDatos(); // Guardar datos en localStorage
-    mostrarProductos(); // Actualizar la lista de productos
-}
-
-// Inicializar
-cargarCategorias();
-mostrarCategorias();
-mostrarProductos();

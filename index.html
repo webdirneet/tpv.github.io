@@ -3,42 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TPV Bar - Gestión</title>
+    <title>Gestión TPV Bar</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="container">
-        <h1>TPV Bar - Gestión</h1>
+    <h1>Gestión de Productos y Categorías</h1>
+    <nav>
+        <a href="ventas.html">Ventas</a> | <a href="mesas.html">Mesas</a>
+    </nav>
 
-        <!-- Sección de gestión de categorías -->
-        <div class="gestion-categorias">
-            <h2>Gestión de Categorías</h2>
-            <input type="text" id="nombre-categoria" placeholder="Nombre de la categoría">
-            <button id="agregar-categoria">Agregar Categoría</button>
-            <ul id="lista-categorias">
-                <!-- Las categorías se cargarán aquí dinámicamente -->
-            </ul>
-        </div>
+    <!-- Gestión de Categorías -->
+    <section>
+        <h2>Categorías</h2>
+        <form id="categoryForm">
+            <input type="text" id="categoryName" placeholder="Nombre de categoría" required>
+            <button type="submit">Añadir Categoría</button>
+        </form>
+        <ul id="categoryList"></ul>
+    </section>
 
-        <!-- Sección de gestión de productos -->
-        <div class="gestion-productos">
-            <h2>Gestión de Productos</h2>
-            <input type="text" id="nombre-producto" placeholder="Nombre del producto">
-            <input type="number" id="precio-producto" placeholder="Precio">
-            <select id="categoria-producto">
-                <!-- Las opciones de categorías se cargarán aquí dinámicamente -->
-            </select>
-            <button id="agregar-producto">Agregar Producto</button>
-            <ul id="lista-productos">
-                <!-- Los productos se cargarán aquí dinámicamente -->
-            </ul>
-        </div>
+    <!-- Gestión de Productos -->
+    <section>
+        <h2>Productos</h2>
+        <form id="productForm">
+            <input type="text" id="productName" placeholder="Nombre del producto" required>
+            <input type="number" id="productPrice" placeholder="Precio" step="0.01" required>
+            <select id="productCategory" required></select>
+            <button type="submit">Añadir Producto</button>
+        </form>
+        <ul id="productList"></ul>
+    </section>
 
-        <!-- Enlace a la página de ventas -->
-        <a href="ventas.html" class="btn-ventas">Ir a Ventas</a>
-        <!-- Enlace a la página de mesas -->
-        <a href="mesas.html" class="btn-mesas">Ir a Mesas</a>
-    </div>
+    <button id="exportData">Exportar Datos (JSON)</button>
     <script src="script.js"></script>
 </body>
 </html>
